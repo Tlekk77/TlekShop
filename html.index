@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ร้านค้าโรงเรียน</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card img { width: 100%; border-radius: 8px; }
+        .checkout-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">🛒 ร้านค้าในโรงเรียน</h2>
+    <div id="product-list" class="grid">กำลังโหลดสินค้า...</div>
+
+    <div id="checkout" class="checkout-box">
+        <h3>📍 แจ้งที่อยู่จัดส่ง</h3>
+        <p id="order-summary"></p>
+        <p>📱 โอนเงินเข้าบัญชี: 123-4-56789-0 (ธนาคาร...)</p>
+        <form id="orderForm">
+            <input type="text" id="custName" placeholder="ชื่อของคุณ" required>
+            <input type="tel" id="custPhone" placeholder="เบอร์โทร" required>
+            <input type="text" id="custLoc" placeholder="ตึก/ห้อง/จุดนัดพบ" required>
+            <button type="submit" id="confirmBtn">ยืนยันการโอนเงินและสั่งซื้อ</button>
+            <button type="button" onclick="document.getElementById('checkout').style.display='none'" style="background:#666;">ยกเลิก</button>
+        </form>
+    </div>
+
+<script>
+    const API_URL = "ใส่_URL_WEB_APP_ที่ก๊อปปี้มา_ตรงนี้";
+    let selectedItem = {};
+
+    // 1. ดึงสต็อกมาแสดง
+    async function loadProducts() {
+        const res = await fetch(API_URL);
+        const products = await res.json();
+        let html = '';
+        products.forEach(pd => {
+            html += `
+                <div class="card">
+                    <img src="${pd.image || 'https://via.placeholder.com/150'}" alt="${pd.name}">
+                    <h4>${pd.name}</h4>
+                    <p>ราคา: ${pd.price}฿ | เหลือ: ${pd.stock}</p>
+                    <button onclick="openCheckout('${pd.name}', ${pd.price})" ${pd.stock <= 0 ? 'disabled' : ''}>
+                        ${pd.stock > 0 ? 'ซื้อเลย' : 'ของหมด'}
+                    </button>
+                </div>`;
+        });
+        document.getElementById('product-list').innerHTML = html;
+    }
+
+    function openCheckout(name, price) {
+        selectedItem = { name, price };
+        document.getElementById('order-summary').innerText = `สินค้า: ${name} (ราคา ${price} บาท)`;
+        document.getElementById('checkout').style.display = 'block';
+    }
+
+    // 2. ส่งคำสั่งซื้อ
+    document.getElementById('orderForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('confirmBtn');
+        btn.disabled = true; btn.innerText = "กำลังสั่งซื้อ...";
+
+        const payload = {
+            name: document.getElementById('custName').value,
+            phone: document.getElementById('custPhone').value,
+            location: document.getElementById('custLoc').value,
+            item: selectedItem.name,
+            total: selectedItem.price
+        };
+
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        alert('สั่งซื้อสำเร็จ! บอทแจ้งเตือนเจ้าของร้านแล้วครับ');
+        location.reload();
+    };
+
+    loadProducts();
+</script>
+</body>
+</html>
