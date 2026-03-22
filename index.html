@@ -2,73 +2,68 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>ร้านค้าโรงเรียน</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ร้านค้าในโรงเรียน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kanit', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
-        .checkout-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                        background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; z-index: 100; overflow-y: auto; max-height: 90vh; }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box; }
+        .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+        .checkout-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.3); width: 90%; max-width: 400px; z-index: 1000; max-height: 85vh; overflow-y: auto; }
+        input, button, textarea { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-family: 'Kanit'; }
         button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:disabled { background: #ccc; }
-        
-        /* เพิ่มสไตล์ QR Code */
-        .qr-section { text-align: center; background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .qr-section img { width: 200px; border: 2px solid #fff; border-radius: 5px; }
+        .qr-img { width: 180px; margin: 10px auto; display: block; border: 2px solid #eee; }
     </style>
 </head>
 <body>
 
     <h2 style="text-align: center;">🛒 ร้านค้าในโรงเรียน</h2>
-    <div id="product-list" class="grid">กำลังโหลดสินค้า...</div>
+    <div id="product-list" class="grid">กำลังโหลดสต็อกสินค้า...</div>
 
     <div id="checkout" class="checkout-box">
-        <h3>💰 ชำระเงิน & แจ้งที่อยู่</h3>
-        
-        <div class="qr-section">
-            <p>สแกนเพื่อโอนเงิน</p>
-            <img src="https://scontent.xx.fbcdn.net/v/t1.15752-9/654052002_1234243365525592_4124709852134791114_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_ohc=1rt1YqfRdWwQ7kNvwHTWC9F&_nc_oc=AdpGonEqhpyDWekfLb8wUVYeMfCXN93nT-DZmwPkpvEsXeUWe8CW26dWXkIIdTbFNa0hieo9VmQZeXAyGPD1t88o&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.xx&_nc_ss=7a32e&oh=03_Q7cD4wHkGUL32VZaH61LzdTwY7JzCsGlSRKg_bn1A-lnod7H2A&oe=69E77757" alt="QR Code Payment">
-            <p style="font-size: 0.8em; color: #666;">ชื่อบัญชี: นายธีรเมธ แสงแก้ว (กสิกรไทย)</p>
+        <h3 style="margin-top:0">💰 ชำระเงิน & แจ้งที่อยู่</h3>
+        <div style="text-align:center; background:#f9f9f9; padding:10px; border-radius:10px;">
+            <p style="margin:0">สแกนเพื่อโอนเงิน</p>
+            <img src="https://scontent.xx.fbcdn.net/v/t1.15752-9/654052002_1234243365525592_4124709852134791114_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_ohc=1rt1YqfRdWwQ7kNvwHTWC9F&_nc_oc=AdpGonEqhpyDWekfLb8wUVYeMfCXN93nT-DZmwPkpvEsXeUWe8CW26dWXkIIdTbFNa0hieo9VmQZeXAyGPD1t88o&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.xx&_nc_ss=7a32e&oh=03_Q7cD4wHkGUL32VZaH61LzdTwY7JzCsGlSRKg_bn1A-lnod7H2A&oe=69E77757" class="qr-img">
+            <p style="font-size:0.8em; color:#666;">ชื่อบัญชี: นาย ธีรเมธ แสงแก้ว(กสิกรไทย)</p>
         </div>
-
-        <p id="order-summary" style="font-weight: bold; color: #28a745;"></p>
+        
+        <p id="order-summary" style="font-weight:bold; color:#28a745; margin:10px 0;"></p>
         
         <form id="orderForm">
             <input type="text" id="custName" placeholder="ชื่อของคุณ" required>
             <input type="tel" id="custPhone" placeholder="เบอร์โทร" required>
-            <input type="text" id="custLoc" placeholder="ตึก/ห้อง/จุดนัดพบ" required>
-            
-            <label style="font-size: 0.8em; color: #555;">📸 แนบหลักฐานการโอนเงิน:</label>
+            <textarea id="custLoc" placeholder="ตึก/ห้อง/จุดนัดพบ" required></textarea>
+            <label style="font-size:0.8em;">📸 แนบรูปสลิปโอนเงิน:</label>
             <input type="file" id="slipFile" accept="image/*" required>
-            
-            <button type="submit" id="confirmBtn">ยืนยันการโอนเงินและสั่งซื้อ</button>
+            <button type="submit" id="confirmBtn">ยืนยันการสั่งซื้อ</button>
             <button type="button" onclick="document.getElementById('checkout').style.display='none'" style="background:#666;">ยกเลิก</button>
         </form>
     </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyvnAahO5GNw16zCC9weNwng07kBDamVv-xSzvSek9iC-ysb0CjYq1ZOZz610SCoQbA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbynMB_wcEJUdL03r0Qvah6dAVzJTq611srwgBKXVyniSYkVRzyloMlbjI2KjTEFW4lU/exec";
     let selectedItem = {};
 
     async function loadProducts() {
-        const res = await fetch(API_URL);
-        const products = await res.json();
-        let html = '';
-        products.forEach(pd => {
-            html += `
-                <div class="card">
+        try {
+            const res = await fetch(API_URL);
+            const products = await res.json();
+            let html = '';
+            products.forEach(pd => {
+                html += `<div class="card">
                     <img src="${pd.image || 'https://via.placeholder.com/150'}" alt="${pd.name}">
                     <h4>${pd.name}</h4>
-                    <p>ราคา: ${pd.price}฿ | เหลือ: ${pd.stock}</p>
+                    <p>${pd.price}฿ | เหลือ: ${pd.stock}</p>
                     <button onclick="openCheckout('${pd.name}', ${pd.price})" ${pd.stock <= 0 ? 'disabled' : ''}>
                         ${pd.stock > 0 ? 'ซื้อเลย' : 'ของหมด'}
                     </button>
                 </div>`;
-        });
-        document.getElementById('product-list').innerHTML = html;
+            });
+            document.getElementById('product-list').innerHTML = html;
+        } catch(e) { document.getElementById('product-list').innerHTML = "โหลดไม่สำเร็จ เช็ค API URL"; }
     }
 
     function openCheckout(name, price) {
@@ -77,16 +72,13 @@
         document.getElementById('checkout').style.display = 'block';
     }
 
-    // ส่วนส่งข้อมูลแบบมีแนบไฟล์
     document.getElementById('orderForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('confirmBtn');
         const fileInput = document.getElementById('slipFile');
-        btn.disabled = true; btn.innerText = "กำลังอัปโหลดสลิป...";
+        btn.disabled = true; btn.innerText = "กำลังส่งข้อมูล...";
 
         let slipData = { base64: null, type: null };
-        
-        // อ่านไฟล์รูป
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const reader = new FileReader();
@@ -112,16 +104,17 @@
         };
 
         try {
+            // ใช้ fetch แบบปกติเพื่อเช็คความชัวร์
             await fetch(API_URL, { 
                 method: 'POST', 
-                mode: 'no-cors', // เพิ่มเพื่อป้องกันหน้าเว็บค้าง
+                mode: 'no-cors', 
                 body: JSON.stringify(payload) 
             });
-            alert('สั่งซื้อสำเร็จ! บอทแจ้งเตือนเจ้าของร้านแล้วครับ');
+            alert('สั่งซื้อสำเร็จแล้วครับ!');
             location.reload();
         } catch (err) {
-            alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
-            btn.disabled = false; btn.innerText = "ยืนยันการโอนเงินและสั่งซื้อ";
+            alert('เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+            btn.disabled = false;
         }
     };
 
