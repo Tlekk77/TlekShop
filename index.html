@@ -8,12 +8,16 @@
         body { font-family: 'Kanit', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .card img { width: 100%; border-radius: 8px; }
+        .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
         .checkout-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                        background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
+                        background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; z-index: 100; overflow-y: auto; max-height: 90vh; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box; }
         button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:disabled { background: #ccc; }
+        
+        /* เพิ่มสไตล์ QR Code */
+        .qr-section { text-align: center; background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+        .qr-section img { width: 200px; border: 2px solid #fff; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -22,13 +26,24 @@
     <div id="product-list" class="grid">กำลังโหลดสินค้า...</div>
 
     <div id="checkout" class="checkout-box">
-        <h3>📍 แจ้งที่อยู่จัดส่ง</h3>
-        <p id="order-summary"></p>
-        <p>📱 โอนเงินเข้าบัญชี: 123-4-56789-0 (ธนาคาร...)</p>
+        <h3>💰 ชำระเงิน & แจ้งที่อยู่</h3>
+        
+        <div class="qr-section">
+            <p>สแกนเพื่อโอนเงิน</p>
+            <img src="https://scontent.xx.fbcdn.net/v/t1.15752-9/654052002_1234243365525592_4124709852134791114_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=9f807c&_nc_ohc=1rt1YqfRdWwQ7kNvwHTWC9F&_nc_oc=AdpGonEqhpyDWekfLb8wUVYeMfCXN93nT-DZmwPkpvEsXeUWe8CW26dWXkIIdTbFNa0hieo9VmQZeXAyGPD1t88o&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.xx&_nc_ss=7a32e&oh=03_Q7cD4wHkGUL32VZaH61LzdTwY7JzCsGlSRKg_bn1A-lnod7H2A&oe=69E77757" alt="QR Code Payment">
+            <p style="font-size: 0.8em; color: #666;">ชื่อบัญชี: นาย... (ธนาคาร...)</p>
+        </div>
+
+        <p id="order-summary" style="font-weight: bold; color: #28a745;"></p>
+        
         <form id="orderForm">
             <input type="text" id="custName" placeholder="ชื่อของคุณ" required>
             <input type="tel" id="custPhone" placeholder="เบอร์โทร" required>
             <input type="text" id="custLoc" placeholder="ตึก/ห้อง/จุดนัดพบ" required>
+            
+            <label style="font-size: 0.8em; color: #555;">📸 แนบหลักฐานการโอนเงิน:</label>
+            <input type="file" id="slipFile" accept="image/*" required>
+            
             <button type="submit" id="confirmBtn">ยืนยันการโอนเงินและสั่งซื้อ</button>
             <button type="button" onclick="document.getElementById('checkout').style.display='none'" style="background:#666;">ยกเลิก</button>
         </form>
@@ -38,7 +53,6 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyvnAahO5GNw16zCC9weNwng07kBDamVv-xSzvSek9iC-ysb0CjYq1ZOZz610SCoQbA/exec";
     let selectedItem = {};
 
-    // 1. ดึงสต็อกมาแสดง
     async function loadProducts() {
         const res = await fetch(API_URL);
         const products = await res.json();
@@ -59,27 +73,56 @@
 
     function openCheckout(name, price) {
         selectedItem = { name, price };
-        document.getElementById('order-summary').innerText = `สินค้า: ${name} (ราคา ${price} บาท)`;
+        document.getElementById('order-summary').innerText = `รายการ: ${name} (${price} บาท)`;
         document.getElementById('checkout').style.display = 'block';
     }
 
-    // 2. ส่งคำสั่งซื้อ
+    // ส่วนส่งข้อมูลแบบมีแนบไฟล์
     document.getElementById('orderForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('confirmBtn');
-        btn.disabled = true; btn.innerText = "กำลังสั่งซื้อ...";
+        const fileInput = document.getElementById('slipFile');
+        btn.disabled = true; btn.innerText = "กำลังอัปโหลดสลิป...";
+
+        let slipData = { base64: null, type: null };
+        
+        // อ่านไฟล์รูป
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            const promise = new Promise((resolve) => {
+                reader.onload = () => {
+                    slipData.base64 = reader.result.split(',')[1];
+                    slipData.type = file.type;
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+            await promise;
+        }
 
         const payload = {
             name: document.getElementById('custName').value,
             phone: document.getElementById('custPhone').value,
             location: document.getElementById('custLoc').value,
             item: selectedItem.name,
-            total: selectedItem.price
+            total: selectedItem.price,
+            slipBase64: slipData.base64,
+            slipType: slipData.type
         };
 
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        alert('สั่งซื้อสำเร็จ! บอทแจ้งเตือนเจ้าของร้านแล้วครับ');
-        location.reload();
+        try {
+            await fetch(API_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', // เพิ่มเพื่อป้องกันหน้าเว็บค้าง
+                body: JSON.stringify(payload) 
+            });
+            alert('สั่งซื้อสำเร็จ! บอทแจ้งเตือนเจ้าของร้านแล้วครับ');
+            location.reload();
+        } catch (err) {
+            alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+            btn.disabled = false; btn.innerText = "ยืนยันการโอนเงินและสั่งซื้อ";
+        }
     };
 
     loadProducts();
