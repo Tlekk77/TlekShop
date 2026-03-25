@@ -1,0 +1,16 @@
+.product-card {
+  border-radius: 15px; /* ทำให้มุมมนขึ้น */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px); /* ยกตัวขึ้นเมื่อชี้ */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.buy-button {
+  background: linear-gradient(135deg, #28a745, #218838);
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
